@@ -1,0 +1,9 @@
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+
+# Nuxt CLI 3.37 uses cac 7, while its optional shell-completion helper still
+# declares only cac 6. Allow the version selected by Nuxt for that helper.
+peerDependencyRules:
+  allowedVersions:
+    '@bomb.sh/tab@0.0.19>cac': '7'
