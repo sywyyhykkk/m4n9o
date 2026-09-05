@@ -4,9 +4,11 @@ import { useTerminalCommands } from '~/composables/useTerminalCommands'
 
 const command = ref('')
 const promptTime = ref<string | null>(null)
+const systemTime = ref('connecting...')
 const history = ref<TerminalHistoryEntry[]>([])
 const commandHistory = ref<string[]>([])
 const isMaximized = ref(false)
+const showWelcome = ref(true)
 const input = useTemplateRef<HTMLInputElement>('input')
 const screen = useTemplateRef<HTMLElement>('screen')
 
@@ -17,10 +19,24 @@ let commandDraft = ''
 const { runCommand, theme } = useTerminalCommands({
   clearHistory: () => {
     history.value = []
+    showWelcome.value = false
   },
   closePage,
   commandHistory,
 })
+
+const welcomeLines = computed(() => [
+  'Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-cloud-amd64 x86_64)',
+  '',
+  ` * System information as of ${systemTime.value}`,
+  '   System load:  0.08             Processes:             96',
+  '   Usage of /:   18.4% of 24.2GB  Users logged in:       1',
+  '   Memory usage: 22%              IPv4 address for eth0: 10.0.0.42',
+  '',
+  `Last login: ${systemTime.value} from 127.0.0.1`,
+  '',
+  "Type 'help' to list available commands.",
+])
 
 function formatPromptTime(date: Date) {
   const pad = (value: number) => String(value).padStart(2, '0')
@@ -130,7 +146,10 @@ function toggleMaximized() {
 }
 
 onMounted(async () => {
-  promptTime.value = formatPromptTime(new Date())
+  const now = new Date()
+
+  promptTime.value = formatPromptTime(now)
+  systemTime.value = now.toUTCString()
   await nextTick()
   focusInput()
 })
@@ -173,6 +192,24 @@ onMounted(async () => {
         class="terminal"
         @click="focusInput"
       >
+        <div
+          v-if="showWelcome"
+          class="terminal__motd"
+          aria-label="Cloud server system information"
+        >
+          <div
+            v-for="(line, index) in welcomeLines"
+            :key="index"
+            class="terminal__motd-line"
+            :class="{
+              'terminal__motd-line--welcome': index === 0,
+              'terminal__motd-line--hint': index === welcomeLines.length - 1,
+            }"
+          >
+            {{ line || '\u00A0' }}
+          </div>
+        </div>
+
         <div
           v-for="entry in history"
           :key="entry.id"
@@ -366,6 +403,25 @@ onMounted(async () => {
 .terminal__entry + .terminal__entry,
 .terminal__entry + .terminal__line {
   margin-top: 0.4rem;
+}
+
+.terminal__motd {
+  margin-bottom: 0.7rem;
+  color: var(--terminal-muted);
+  white-space: pre;
+}
+
+.terminal__motd-line {
+  min-height: 1lh;
+}
+
+.terminal__motd-line--welcome {
+  color: var(--terminal-bright);
+  font-weight: 600;
+}
+
+.terminal__motd-line--hint {
+  color: var(--terminal-text);
 }
 
 .terminal__line {
