@@ -25,19 +25,55 @@ useSeoMeta({
 
 <template>
   <main class="wip-page">
-    <p>WIP</p>
+    <section class="wip-shell" :aria-labelledby="`${directory.name}-title`">
+      <TerminalSectionHeader :section="directory.name" />
+
+      <div class="wip-content">
+        <p class="wip-path">./{{ directory.name }}</p>
+        <h1 :id="`${directory.name}-title`">WIP</h1>
+      </div>
+    </section>
   </main>
 </template>
 
 <style scoped>
 .wip-page {
-  display: grid;
   min-height: 100dvh;
-  padding: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 3.5rem);
   background: #000;
-  color: #45f47b;
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: #d9ffe4;
+}
+
+.wip-shell {
+  width: min(100%, 62rem);
+  margin: 0 auto;
+}
+
+.wip-content {
+  display: grid;
+  min-height: calc(100dvh - clamp(7rem, 12vw, 10rem));
+  place-content: center;
+  text-align: center;
+}
+
+.wip-path {
+  margin: 0 0 0.75rem;
+  color: #52735c;
+  font-size: 0.875rem;
   letter-spacing: 0.08em;
-  place-items: center;
+}
+
+.wip-content h1 {
+  margin: 0;
+  color: #45f47b;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 560;
+  letter-spacing: -0.04em;
+}
+
+@media (max-width: 620px) {
+  .wip-page {
+    padding: 1.25rem 1rem 2rem;
+  }
 }
 </style>

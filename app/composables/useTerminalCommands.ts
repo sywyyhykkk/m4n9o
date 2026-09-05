@@ -92,6 +92,7 @@ async function fetchJoke(): Promise<CommandOutput> {
 
 export function useTerminalCommands(options: TerminalCommandOptions) {
   const { public: publicConfig } = useRuntimeConfig()
+  const router = useRouter()
   const theme = ref<TerminalTheme>('green')
   let mountedAt = Date.now()
 
@@ -128,8 +129,8 @@ export function useTerminalCommands(options: TerminalCommandOptions) {
     {
       name: 'cd',
       usage: 'cd <directory>',
-      description: 'Open a directory in a new tab',
-      handler: ({ args, raw }) => {
+      description: 'Open a directory',
+      handler: async ({ args, raw }) => {
         const directory = args.length === 1
           ? terminalDirectories.find(item => item.name === args[0])
           : undefined
@@ -138,7 +139,7 @@ export function useTerminalCommands(options: TerminalCommandOptions) {
           return commandNotFound(raw)
         }
 
-        window.open(directory.path, '_blank', 'noopener,noreferrer')
+        await router.push(directory.path)
         return []
       },
     },
@@ -183,11 +184,18 @@ export function useTerminalCommands(options: TerminalCommandOptions) {
       handler: noArgs('uptime', () => [`up ${formatUptime(Date.now() - mountedAt)}`]),
     },
     {
-      name: 'version',
-      aliases: ['-v', '--version'],
-      usage: '-v | version | --version',
+      name: 'mango',
+      usage: 'mango -v',
       description: 'Show the current version',
-      handler: noArgs('version', () => [String(publicConfig.appVersion)]),
+      handler: ({ args, raw }) => args.length === 1 && args[0] === '-v'
+        ? [String(publicConfig.appVersion)]
+        : commandNotFound(raw),
+    },
+    {
+      name: '--version',
+      usage: '--version',
+      description: 'Show the current version',
+      handler: noArgs('--version', () => [String(publicConfig.appVersion)]),
     },
     {
       name: 'theme',
@@ -248,17 +256,17 @@ export function useTerminalCommands(options: TerminalCommandOptions) {
       description: 'Try to run a command as root',
       handler: ({ args }) => args.length === 0
         ? ['usage: sudo <command>']
-        : ['mango is not in the sudoers file.', 'This incident will be reported. (Just kidding.)'],
+        : ['mango is not in the sudoers file.', 'This incident will be reported.'],
     },
     {
       name: 'hack',
       usage: 'hack',
       description: 'Run a harmless hacker simulation',
       handler: noArgs('hack', () => [
-        'Initializing totally legitimate hacker mode...',
+        'Initializing remote access module...',
         '[██████████] 100%',
         'ACCESS GRANTED',
-        'Just kidding. No systems were harmed.',
+        'Remote shell established.',
       ]),
     },
     {

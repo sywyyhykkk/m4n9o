@@ -12,18 +12,7 @@ useSeoMeta({
 <template>
   <main class="projects-page">
     <section class="projects-shell" aria-labelledby="projects-title">
-      <header class="projects-header">
-        <NuxtLink class="projects-home" to="/">
-          <span aria-hidden="true">←</span>
-          cd ~
-        </NuxtLink>
-
-        <p class="projects-command" aria-hidden="true">
-          <span class="projects-command__user">mango</span><span class="projects-command__muted">@</span><span class="projects-command__host">m4n9o</span><span class="projects-command__path">:~/project</span>
-          <span class="projects-command__symbol">$</span>
-          tree
-        </p>
-      </header>
+      <TerminalSectionHeader section="project" />
 
       <div class="projects-intro">
         <p class="projects-eyebrow">
@@ -96,62 +85,10 @@ useSeoMeta({
   margin: 0 auto;
 }
 
-.projects-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid #1f3526;
-  font-size: 0.875rem;
-}
-
-.projects-home {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: #8de8a8;
-  text-decoration: none;
-}
-
-.projects-home:hover,
-.projects-home:focus-visible {
-  color: #d9ffe4;
-}
-
-.projects-home:focus-visible,
 .project-card__link:focus-visible {
   border-radius: 0.2rem;
   outline: 2px solid #45f47b;
   outline-offset: 4px;
-}
-
-.projects-command {
-  margin: 0;
-  color: #45f47b;
-  white-space: nowrap;
-}
-
-.projects-command__user,
-.projects-command__symbol {
-  color: #45f47b;
-  font-weight: 650;
-}
-
-.projects-command__muted {
-  color: #52735c;
-}
-
-.projects-command__host {
-  color: #8de8a8;
-}
-
-.projects-command__path {
-  color: #38c864;
-}
-
-.projects-command__symbol {
-  margin: 0 0.5rem;
 }
 
 .projects-intro {
@@ -311,18 +248,6 @@ useSeoMeta({
 @media (max-width: 620px) {
   .projects-page {
     padding: 1.25rem 1rem 2rem;
-  }
-
-  .projects-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  .projects-command {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .projects-intro {
