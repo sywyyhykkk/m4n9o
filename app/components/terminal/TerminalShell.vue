@@ -49,6 +49,7 @@ const helpLines = [
   '  banner <text>        Print text as a banner',
   '  sudo <command>       Try to run a command as root',
   '  hack                 Run a harmless hacker simulation',
+  '  konami               Open the hidden easter egg',
   '  42                   Find the answer',
   '  reload               Reload this page',
   '  clear                Clear terminal output',
@@ -229,6 +230,11 @@ async function runCommand(value: string): Promise<string[]> {
     ]
   }
 
+  if (name === 'konami' && args.length === 0) {
+    window.open('https://b23.tv/xGvB7Db', '_blank', 'noopener,noreferrer')
+    return ['Easter egg unlocked in a new tab.']
+  }
+
   if (value === 'rm -rf /') {
     return [
       'rm: refusing to remove the universe',
@@ -293,8 +299,10 @@ async function submitCommand() {
   history.value.push(entry)
   command.value = ''
 
+  const outputPromise = runCommand(value)
+
   await nextTick()
-  const output = await runCommand(value)
+  const output = await outputPromise
   const pendingEntry = history.value.find(item => item.id === entry.id)
 
   if (pendingEntry) {
@@ -632,6 +640,7 @@ onMounted(async () => {
   background: transparent;
   color: var(--terminal-bright);
   caret-color: var(--terminal-text);
+  font-size: 1rem;
   line-height: inherit;
   outline: 2px solid transparent;
 }
