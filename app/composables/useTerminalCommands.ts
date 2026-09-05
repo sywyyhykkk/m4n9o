@@ -187,7 +187,7 @@ export function useTerminalCommands(options: TerminalCommandOptions) {
       aliases: ['-v', '--version'],
       usage: '-v | version | --version',
       description: 'Show the current version',
-      handler: noArgs('version', () => [publicConfig.appVersion]),
+      handler: noArgs('version', () => [String(publicConfig.appVersion)]),
     },
     {
       name: 'theme',

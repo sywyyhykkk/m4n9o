@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TerminalHistoryEntry } from '~/types/terminal'
+import { useTerminalCommands } from '~/composables/useTerminalCommands'
 
 const command = ref('')
 const promptTime = ref<string | null>(null)
