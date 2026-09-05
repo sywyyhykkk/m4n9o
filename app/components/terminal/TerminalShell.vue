@@ -1,60 +1,25 @@
 <script setup lang="ts">
-import type { TerminalDirectory, TerminalHistoryEntry } from '~/types/terminal'
-import { terminalDirectories } from '~/data/terminal'
-
-type ThemeName = 'amber' | 'blue' | 'green' | 'violet'
-
-interface JokeApiResponse {
-  delivery?: string
-  error: boolean
-  joke?: string
-  setup?: string
-  type?: 'single' | 'twopart'
-}
+import type { TerminalHistoryEntry } from '~/types/terminal'
 
 const command = ref('')
 const promptTime = ref<string | null>(null)
 const history = ref<TerminalHistoryEntry[]>([])
 const commandHistory = ref<string[]>([])
 const isMaximized = ref(false)
-const theme = ref<ThemeName>('green')
 const input = useTemplateRef<HTMLInputElement>('input')
 const screen = useTemplateRef<HTMLElement>('screen')
-const { public: publicConfig } = useRuntimeConfig()
 
 let historyId = 0
 let commandHistoryIndex = 0
 let commandDraft = ''
-let mountedAt = Date.now()
 
-const directoryNames = terminalDirectories.map(directory => directory.name).join('   ')
-const themes: ThemeName[] = ['green', 'amber', 'blue', 'violet']
-const helpLines = [
-  'Available commands:',
-  '  help                 Show this help',
-  '  ls                   List directories',
-  '  whoami               Print the current user',
-  '  cd <directory>       Open a directory in a new tab',
-  '  tree                 Show the site directory tree',
-  '  history              Show command history',
-  '  date                 Show the local date and time',
-  '  echo <text>          Print text',
-  '  uptime               Show how long this terminal has been open',
-  '  -v | version | --version',
-  '                       Show the current version',
-  '  theme <name>         Change the terminal color theme',
-  '  contact              Show the contact email',
-  '  joke                 Fetch a programming joke',
-  '  coffee               Brew some terminal coffee',
-  '  banner <text>        Print text as a banner',
-  '  sudo <command>       Try to run a command as root',
-  '  hack                 Run a harmless hacker simulation',
-  '  konami               Open the hidden easter egg',
-  '  42                   Find the answer',
-  '  reload               Reload this page',
-  '  clear                Clear terminal output',
-  '  exit                 Close this page',
-]
+const { runCommand, theme } = useTerminalCommands({
+  clearHistory: () => {
+    history.value = []
+  },
+  closePage,
+  commandHistory,
+})
 
 function formatPromptTime(date: Date) {
   const pad = (value: number) => String(value).padStart(2, '0')
@@ -72,207 +37,6 @@ function formatPromptTime(date: Date) {
   ].join('')
 }
 
-function findDirectory(name: string): TerminalDirectory | undefined {
-  return terminalDirectories.find(directory => directory.name === name)
-}
-
-function commandNotFound(value: string) {
-  return [`m4n9o: command not found: ${value}`]
-}
-
-function formatUptime(milliseconds: number) {
-  const totalSeconds = Math.floor(milliseconds / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  const parts = [
-    hours > 0 ? `${hours}h` : '',
-    minutes > 0 || hours > 0 ? `${minutes}m` : '',
-    `${seconds}s`,
-  ]
-
-  return parts.filter(Boolean).join(' ')
-}
-
-function setTheme(name: string): string[] {
-  if (!themes.includes(name as ThemeName)) {
-    return [`Usage: theme <${themes.join('|')}>`]
-  }
-
-  theme.value = name as ThemeName
-  localStorage.setItem('m4n9o-theme', theme.value)
-
-  return [`Theme changed to ${theme.value}.`]
-}
-
-async function fetchJoke(): Promise<string[]> {
-  try {
-    const response = await fetch('https://v2.jokeapi.dev/joke/Programming?safe-mode')
-
-    if (!response.ok) {
-      throw new Error(`JokeAPI returned ${response.status}`)
-    }
-
-    const joke = await response.json() as JokeApiResponse
-
-    if (joke.error) {
-      throw new Error('JokeAPI could not find a joke')
-    }
-
-    if (joke.type === 'twopart' && joke.setup && joke.delivery) {
-      return [joke.setup, joke.delivery]
-    }
-
-    if (joke.joke) {
-      return [joke.joke]
-    }
-  }
-  catch {
-    return ['The joke server is taking comedy too seriously. Try again later.']
-  }
-
-  return ['No joke found. The bugs must have fixed it.']
-}
-
-async function runCommand(value: string): Promise<string[]> {
-  const [name, ...args] = value.split(/\s+/)
-
-  if (name === 'help' && args.length === 0) {
-    return helpLines
-  }
-
-  if (name === 'ls' && args.length === 0) {
-    return [directoryNames]
-  }
-
-  if (name === 'whoami' && args.length === 0) {
-    return ['mango']
-  }
-
-  if (name === 'history' && args.length === 0) {
-    return commandHistory.value.map((item, index) => (
-      `${String(index + 1).padStart(3, ' ')}  ${item}`
-    ))
-  }
-
-  if (name === 'date' && args.length === 0) {
-    return [new Date().toString()]
-  }
-
-  if (['-v', '--version', 'version'].includes(name ?? '') && args.length === 0) {
-    return [publicConfig.appVersion]
-  }
-
-  if (name === 'echo') {
-    return [args.join(' ')]
-  }
-
-  if (name === 'uptime' && args.length === 0) {
-    return [`up ${formatUptime(Date.now() - mountedAt)}`]
-  }
-
-  if (name === 'theme' && args.length === 1) {
-    return setTheme(args[0] ?? '')
-  }
-
-  if (name === 'theme' && args.length === 0) {
-    return [`Current theme: ${theme.value}`, `Available themes: ${themes.join(', ')}`]
-  }
-
-  if (name === 'reload' && args.length === 0) {
-    window.location.reload()
-    return []
-  }
-
-  if (name === 'contact' && args.length === 0) {
-    return ['joe_zjy@outlook.com']
-  }
-
-  if (name === 'joke' && args.length === 0) {
-    return fetchJoke()
-  }
-
-  if (name === 'coffee' && args.length === 0) {
-    return [
-      '      ( (',
-      '       ) )',
-      '    ........',
-      '    |      |]',
-      '    \\      /',
-      '     `----\' ',
-      'Coffee compiled successfully.',
-    ]
-  }
-
-  if (name === 'banner' && args.length > 0) {
-    const text = args.join(' ').toUpperCase().slice(0, 48)
-    const border = '═'.repeat(text.length + 2)
-
-    return [`╔${border}╗`, `║ ${text} ║`, `╚${border}╝`]
-  }
-
-  if (name === 'banner') {
-    return ['Usage: banner <text>']
-  }
-
-  if (name === 'sudo') {
-    return args.length === 0
-      ? ['usage: sudo <command>']
-      : ['mango is not in the sudoers file.', 'This incident will be reported. (Just kidding.)']
-  }
-
-  if (name === 'hack' && args.length === 0) {
-    return [
-      'Initializing totally legitimate hacker mode...',
-      '[██████████] 100%',
-      'ACCESS GRANTED',
-      'Just kidding. No systems were harmed.',
-    ]
-  }
-
-  if (name === 'konami' && args.length === 0) {
-    window.open('https://b23.tv/xGvB7Db', '_blank', 'noopener,noreferrer')
-    return ['Easter egg unlocked in a new tab.']
-  }
-
-  if (value === 'rm -rf /') {
-    return [
-      'rm: refusing to remove the universe',
-      'Nice try. This terminal has survival instincts.',
-    ]
-  }
-
-  if (name === 'tree' && args.length === 0) {
-    const branches = terminalDirectories.map((directory, index) => {
-      const connector = index === terminalDirectories.length - 1 ? '└──' : '├──'
-
-      return `${connector} ${directory.name}/`
-    })
-
-    return ['~', ...branches]
-  }
-
-  if (name === '42' && args.length === 0) {
-    return ['The answer to life, the universe, and everything.']
-  }
-
-  if (name === 'exit' && args.length === 0) {
-    closePage()
-    return []
-  }
-
-  if (name === 'cd' && args.length === 1) {
-    const directory = findDirectory(args[0] ?? '')
-
-    if (directory) {
-      window.open(directory.path, '_blank', 'noopener,noreferrer')
-      return []
-    }
-  }
-
-  return commandNotFound(value)
-}
-
 async function submitCommand() {
   const value = command.value.trim().replace(/\s+/g, ' ')
 
@@ -283,12 +47,6 @@ async function submitCommand() {
   commandHistory.value.push(value)
   commandHistoryIndex = commandHistory.value.length
   commandDraft = ''
-
-  if (value === 'clear') {
-    history.value = []
-    command.value = ''
-    return
-  }
 
   const entry: TerminalHistoryEntry = {
     id: historyId++,
@@ -371,13 +129,6 @@ function toggleMaximized() {
 }
 
 onMounted(async () => {
-  mountedAt = Date.now()
-  const storedTheme = localStorage.getItem('m4n9o-theme')
-
-  if (themes.includes(storedTheme as ThemeName)) {
-    theme.value = storedTheme as ThemeName
-  }
-
   promptTime.value = formatPromptTime(new Date())
   await nextTick()
   focusInput()
