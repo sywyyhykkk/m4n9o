@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   devtools: { enabled: false },
   modules: ['@nuxt/eslint'],
+  runtimeConfig: {
+    public: {
+      appVersion: '0.0.1',
+    },
+  },
   typescript: {
     strict: true,
     typeCheck: true,

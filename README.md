@@ -8,7 +8,10 @@ Use Node.js 24 LTS and pnpm.
 
 ```bash
 pnpm install
+cp .env.example .env
 ```
+
+The terminal version is controlled by `NUXT_PUBLIC_APP_VERSION` in `.env`.
 
 ## Development Server
 

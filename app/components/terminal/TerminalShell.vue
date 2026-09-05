@@ -2,27 +2,55 @@
 import type { TerminalDirectory, TerminalHistoryEntry } from '~/types/terminal'
 import { terminalDirectories } from '~/data/terminal'
 
+type ThemeName = 'amber' | 'blue' | 'green' | 'violet'
+
+interface JokeApiResponse {
+  delivery?: string
+  error: boolean
+  joke?: string
+  setup?: string
+  type?: 'single' | 'twopart'
+}
+
 const command = ref('')
 const promptTime = ref<string | null>(null)
 const history = ref<TerminalHistoryEntry[]>([])
 const commandHistory = ref<string[]>([])
 const isMaximized = ref(false)
+const theme = ref<ThemeName>('green')
 const input = useTemplateRef<HTMLInputElement>('input')
 const screen = useTemplateRef<HTMLElement>('screen')
+const { public: publicConfig } = useRuntimeConfig()
 
 let historyId = 0
 let commandHistoryIndex = 0
 let commandDraft = ''
+let mountedAt = Date.now()
 
 const directoryNames = terminalDirectories.map(directory => directory.name).join('   ')
+const themes: ThemeName[] = ['green', 'amber', 'blue', 'violet']
 const helpLines = [
   'Available commands:',
   '  help                 Show this help',
   '  ls                   List directories',
   '  whoami               Print the current user',
   '  cd <directory>       Open a directory in a new tab',
+  '  tree                 Show the site directory tree',
   '  history              Show command history',
   '  date                 Show the local date and time',
+  '  echo <text>          Print text',
+  '  uptime               Show how long this terminal has been open',
+  '  -v | version | --version',
+  '                       Show the current version',
+  '  theme <name>         Change the terminal color theme',
+  '  contact              Show the contact email',
+  '  joke                 Fetch a programming joke',
+  '  coffee               Brew some terminal coffee',
+  '  banner <text>        Print text as a banner',
+  '  sudo <command>       Try to run a command as root',
+  '  hack                 Run a harmless hacker simulation',
+  '  42                   Find the answer',
+  '  reload               Reload this page',
   '  clear                Clear terminal output',
   '  exit                 Close this page',
 ]
@@ -51,7 +79,61 @@ function commandNotFound(value: string) {
   return [`m4n9o: command not found: ${value}`]
 }
 
-function runCommand(value: string): string[] {
+function formatUptime(milliseconds: number) {
+  const totalSeconds = Math.floor(milliseconds / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const parts = [
+    hours > 0 ? `${hours}h` : '',
+    minutes > 0 || hours > 0 ? `${minutes}m` : '',
+    `${seconds}s`,
+  ]
+
+  return parts.filter(Boolean).join(' ')
+}
+
+function setTheme(name: string): string[] {
+  if (!themes.includes(name as ThemeName)) {
+    return [`Usage: theme <${themes.join('|')}>`]
+  }
+
+  theme.value = name as ThemeName
+  localStorage.setItem('m4n9o-theme', theme.value)
+
+  return [`Theme changed to ${theme.value}.`]
+}
+
+async function fetchJoke(): Promise<string[]> {
+  try {
+    const response = await fetch('https://v2.jokeapi.dev/joke/Programming?safe-mode')
+
+    if (!response.ok) {
+      throw new Error(`JokeAPI returned ${response.status}`)
+    }
+
+    const joke = await response.json() as JokeApiResponse
+
+    if (joke.error) {
+      throw new Error('JokeAPI could not find a joke')
+    }
+
+    if (joke.type === 'twopart' && joke.setup && joke.delivery) {
+      return [joke.setup, joke.delivery]
+    }
+
+    if (joke.joke) {
+      return [joke.joke]
+    }
+  }
+  catch {
+    return ['The joke server is taking comedy too seriously. Try again later.']
+  }
+
+  return ['No joke found. The bugs must have fixed it.']
+}
+
+async function runCommand(value: string): Promise<string[]> {
   const [name, ...args] = value.split(/\s+/)
 
   if (name === 'help' && args.length === 0) {
@@ -74,6 +156,98 @@ function runCommand(value: string): string[] {
 
   if (name === 'date' && args.length === 0) {
     return [new Date().toString()]
+  }
+
+  if (['-v', '--version', 'version'].includes(name ?? '') && args.length === 0) {
+    return [publicConfig.appVersion]
+  }
+
+  if (name === 'echo') {
+    return [args.join(' ')]
+  }
+
+  if (name === 'uptime' && args.length === 0) {
+    return [`up ${formatUptime(Date.now() - mountedAt)}`]
+  }
+
+  if (name === 'theme' && args.length === 1) {
+    return setTheme(args[0] ?? '')
+  }
+
+  if (name === 'theme' && args.length === 0) {
+    return [`Current theme: ${theme.value}`, `Available themes: ${themes.join(', ')}`]
+  }
+
+  if (name === 'reload' && args.length === 0) {
+    window.location.reload()
+    return []
+  }
+
+  if (name === 'contact' && args.length === 0) {
+    return ['joe_zjy@outlook.com']
+  }
+
+  if (name === 'joke' && args.length === 0) {
+    return fetchJoke()
+  }
+
+  if (name === 'coffee' && args.length === 0) {
+    return [
+      '      ( (',
+      '       ) )',
+      '    ........',
+      '    |      |]',
+      '    \\      /',
+      '     `----\' ',
+      'Coffee compiled successfully.',
+    ]
+  }
+
+  if (name === 'banner' && args.length > 0) {
+    const text = args.join(' ').toUpperCase().slice(0, 48)
+    const border = '═'.repeat(text.length + 2)
+
+    return [`╔${border}╗`, `║ ${text} ║`, `╚${border}╝`]
+  }
+
+  if (name === 'banner') {
+    return ['Usage: banner <text>']
+  }
+
+  if (name === 'sudo') {
+    return args.length === 0
+      ? ['usage: sudo <command>']
+      : ['mango is not in the sudoers file.', 'This incident will be reported. (Just kidding.)']
+  }
+
+  if (name === 'hack' && args.length === 0) {
+    return [
+      'Initializing totally legitimate hacker mode...',
+      '[██████████] 100%',
+      'ACCESS GRANTED',
+      'Just kidding. No systems were harmed.',
+    ]
+  }
+
+  if (value === 'rm -rf /') {
+    return [
+      'rm: refusing to remove the universe',
+      'Nice try. This terminal has survival instincts.',
+    ]
+  }
+
+  if (name === 'tree' && args.length === 0) {
+    const branches = terminalDirectories.map((directory, index) => {
+      const connector = index === terminalDirectories.length - 1 ? '└──' : '├──'
+
+      return `${connector} ${directory.name}/`
+    })
+
+    return ['~', ...branches]
+  }
+
+  if (name === '42' && args.length === 0) {
+    return ['The answer to life, the universe, and everything.']
   }
 
   if (name === 'exit' && args.length === 0) {
@@ -110,12 +284,22 @@ async function submitCommand() {
     return
   }
 
-  history.value.push({
+  const entry: TerminalHistoryEntry = {
     id: historyId++,
     command: value,
-    output: runCommand(value),
-  })
+    output: ['Working...'],
+  }
+
+  history.value.push(entry)
   command.value = ''
+
+  await nextTick()
+  const output = await runCommand(value)
+  const pendingEntry = history.value.find(item => item.id === entry.id)
+
+  if (pendingEntry) {
+    pendingEntry.output = output
+  }
 
   await nextTick()
   screen.value?.scrollTo({
@@ -179,6 +363,13 @@ function toggleMaximized() {
 }
 
 onMounted(async () => {
+  mountedAt = Date.now()
+  const storedTheme = localStorage.getItem('m4n9o-theme')
+
+  if (themes.includes(storedTheme as ThemeName)) {
+    theme.value = storedTheme as ThemeName
+  }
+
   promptTime.value = formatPromptTime(new Date())
   await nextTick()
   focusInput()
@@ -186,7 +377,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="terminal-page">
+  <main
+    class="terminal-page"
+    :class="`terminal-page--theme-${theme}`"
+  >
     <section
       class="terminal-window"
       :class="{ 'terminal-window--maximized': isMaximized }"
@@ -274,11 +468,58 @@ onMounted(async () => {
 
 <style scoped>
 .terminal-page {
+  --terminal-page-bg: #000;
+  --terminal-window-bg: #050706;
+  --terminal-titlebar-bg: #171918;
+  --terminal-border: #2a2d2b;
+  --terminal-titlebar-border: #292c2a;
+  --terminal-text: #45f47b;
+  --terminal-output: #2fbd5b;
+  --terminal-bright: #d9ffe4;
+  --terminal-muted: #52735c;
+
   display: grid;
   min-height: 100dvh;
   padding: 1.25rem;
-  background: #000;
+  background: var(--terminal-page-bg);
+  transition: background-color 180ms ease;
   place-items: center;
+}
+
+.terminal-page--theme-amber {
+  --terminal-page-bg: #090600;
+  --terminal-window-bg: #0d0a04;
+  --terminal-titlebar-bg: #1d170b;
+  --terminal-border: #58451e;
+  --terminal-titlebar-border: #473817;
+  --terminal-text: #ffc857;
+  --terminal-output: #d9a83e;
+  --terminal-bright: #fff1c2;
+  --terminal-muted: #8c7445;
+}
+
+.terminal-page--theme-blue {
+  --terminal-page-bg: #00060b;
+  --terminal-window-bg: #030a10;
+  --terminal-titlebar-bg: #0b1821;
+  --terminal-border: #1d4f68;
+  --terminal-titlebar-border: #163e52;
+  --terminal-text: #57d7ff;
+  --terminal-output: #36a8d0;
+  --terminal-bright: #d8f7ff;
+  --terminal-muted: #477486;
+}
+
+.terminal-page--theme-violet {
+  --terminal-page-bg: #08030c;
+  --terminal-window-bg: #0d0711;
+  --terminal-titlebar-bg: #1b1021;
+  --terminal-border: #563169;
+  --terminal-titlebar-border: #432652;
+  --terminal-text: #d98cff;
+  --terminal-output: #ad67cf;
+  --terminal-bright: #f8e4ff;
+  --terminal-muted: #80628d;
 }
 
 .terminal-window {
@@ -289,9 +530,9 @@ onMounted(async () => {
   min-width: 36rem;
   min-height: 22rem;
   overflow: hidden;
-  border: 1px solid #2a2d2b;
+  border: 1px solid var(--terminal-border);
   border-radius: 0.8rem;
-  background: #050706;
+  background: var(--terminal-window-bg);
   box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 0.6);
   transition:
     width 220ms ease,
@@ -308,8 +549,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   padding: 0 0.9rem;
-  border-bottom: 1px solid #292c2a;
-  background: #171918;
+  border-bottom: 1px solid var(--terminal-titlebar-border);
+  background: var(--terminal-titlebar-bg);
   user-select: none;
 }
 
@@ -340,7 +581,7 @@ onMounted(async () => {
 }
 
 .terminal-window__control:focus-visible {
-  outline: 2px solid #d9ffe4;
+  outline: 2px solid var(--terminal-bright);
   outline-offset: 3px;
 }
 
@@ -356,7 +597,7 @@ onMounted(async () => {
   min-height: 0;
   overflow: auto;
   padding: 1.1rem 1.25rem 1.4rem;
-  color: #45f47b;
+  color: var(--terminal-text);
   font-size: clamp(0.82rem, 1vw, 0.98rem);
   line-height: 1.7;
   letter-spacing: 0.01em;
@@ -389,18 +630,18 @@ onMounted(async () => {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #d9ffe4;
-  caret-color: #45f47b;
+  color: var(--terminal-bright);
+  caret-color: var(--terminal-text);
   line-height: inherit;
   outline: 2px solid transparent;
 }
 
 .terminal__line--active:focus-within :deep(.terminal-prompt__symbol) {
-  color: #d9ffe4;
+  color: var(--terminal-bright);
 }
 
 .terminal__output {
-  color: #2fbd5b;
+  color: var(--terminal-output);
   white-space: pre-wrap;
 }
 

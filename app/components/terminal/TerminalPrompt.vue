@@ -22,28 +22,28 @@ defineProps<{
 
 .terminal-prompt__time {
   margin-right: 0.65rem;
-  color: #52735c;
+  color: var(--terminal-muted, #52735c);
 }
 
 .terminal-prompt__user {
-  color: #45f47b;
+  color: var(--terminal-text, #45f47b);
   font-weight: 600;
 }
 
 .terminal-prompt__separator {
-  color: #52735c;
+  color: var(--terminal-muted, #52735c);
 }
 
 .terminal-prompt__host {
-  color: #8de8a8;
+  color: var(--terminal-bright, #8de8a8);
 }
 
 .terminal-prompt__path {
-  color: #38c864;
+  color: var(--terminal-output, #38c864);
 }
 
 .terminal-prompt__symbol {
   margin-left: 0.55rem;
-  color: #2fbd5b;
+  color: var(--terminal-output, #2fbd5b);
 }
 </style>
