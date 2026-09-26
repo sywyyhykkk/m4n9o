@@ -24,6 +24,9 @@ const templates = await Promise.all(catalog.map(async (template) => {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(template.id ?? '')) {
     throw new Error(`Invalid UIgly template id: ${template.id}`)
   }
+  if (template.previewHeight !== undefined && (!Number.isInteger(template.previewHeight) || template.previewHeight < 420 || template.previewHeight > 760)) {
+    throw new Error(`Invalid UIgly preview height: ${template.id}`)
+  }
 
   const html = await readSource(`templates/${template.id}/index.html`)
   if (!/^<!doctype html>/i.test(html.trimStart()) || !/<style\b/i.test(html)) {
