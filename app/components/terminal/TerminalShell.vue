@@ -5,6 +5,7 @@ import { useTerminalCommands } from '~/composables/useTerminalCommands'
 const command = ref('')
 const promptTime = ref<string | null>(null)
 const systemTime = ref('connecting...')
+const clientIp = ref('detecting...')
 const history = ref<TerminalHistoryEntry[]>([])
 const commandHistory = ref<string[]>([])
 const isMaximized = ref(false)
@@ -31,9 +32,9 @@ const welcomeLines = computed(() => [
   ` * System information as of ${systemTime.value}`,
   '   System load:  0.08             Processes:             96',
   '   Usage of /:   18.4% of 24.2GB  Users logged in:       1',
-  '   Memory usage: 22%              IPv4 address for eth0: 10.0.0.42',
+  `   Memory usage: 22%              Client IP: ${clientIp.value}`,
   '',
-  `Last login: ${systemTime.value} from 127.0.0.1`,
+  `Last login: ${systemTime.value} from ${clientIp.value}`,
   '',
   "Type 'help' to list available commands.",
 ])
@@ -52,6 +53,23 @@ function formatPromptTime(date: Date) {
     ':',
     pad(date.getMinutes()),
   ].join('')
+}
+
+function formatSystemTime(date: Date) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+    timeZoneName: 'short',
+  }).formatToParts(date)
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find(item => item.type === type)?.value ?? ''
+
+  return `${part('weekday')}, ${part('day')} ${part('month')} ${part('year')} ${part('hour')}:${part('minute')}:${part('second')} ${part('timeZoneName')}`
 }
 
 async function submitCommand() {
@@ -149,9 +167,17 @@ onMounted(async () => {
   const now = new Date()
 
   promptTime.value = formatPromptTime(now)
-  systemTime.value = now.toUTCString()
+  systemTime.value = formatSystemTime(now)
   await nextTick()
   focusInput()
+
+  try {
+    const { ip } = await $fetch<{ ip: string | null }>('/api/client-ip')
+    clientIp.value = ip ?? 'unavailable'
+  }
+  catch {
+    clientIp.value = 'unavailable'
+  }
 })
 </script>
 
