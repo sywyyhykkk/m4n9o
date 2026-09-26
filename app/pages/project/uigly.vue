@@ -28,7 +28,7 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
       </NuxtLink>
 
       <header class="uigly-intro">
-        <p class="uigly-eyebrow">./projects/uigly</p>
+        <p class="uigly-eyebrow">./project/uigly</p>
         <h1>UIgly</h1>
         <p>Intentionally ugly UI. Plain HTML and CSS, ready to open in a browser.</p>
         <a href="https://github.com/sywyyhykkk/uigly" target="_blank" rel="noopener noreferrer">Contribute on GitHub ↗</a>
