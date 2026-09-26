@@ -7,6 +7,9 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "lint": "eslint .",
+    "prebuild": "node scripts/sync-uigly.mjs",
+    "predev": "node scripts/sync-uigly.mjs",
+    "pregenerate": "node scripts/sync-uigly.mjs",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck"

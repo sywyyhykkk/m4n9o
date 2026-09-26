@@ -41,7 +41,7 @@ useSeoMeta({
             <div class="project-card__body">
               <div class="project-card__meta">
                 <span>{{ project.role }}</span>
-                <span>GitHub</span>
+                <span>{{ project.url.startsWith('http') ? 'GitHub' : 'Live gallery' }}</span>
               </div>
 
               <h2>{{ project.name }}</h2>
@@ -51,12 +51,12 @@ useSeoMeta({
             <a
               class="project-card__link"
               :href="project.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              :aria-label="`Open ${project.name} on GitHub in a new tab`"
+              :target="project.url.startsWith('http') ? '_blank' : undefined"
+              :rel="project.url.startsWith('http') ? 'noopener noreferrer' : undefined"
+              :aria-label="project.url.startsWith('http') ? `Open ${project.name} on GitHub in a new tab` : `Open ${project.name} gallery`"
             >
-              View repository
-              <span aria-hidden="true">↗</span>
+              {{ project.url.startsWith('http') ? 'View repository' : 'View gallery' }}
+              <span aria-hidden="true">{{ project.url.startsWith('http') ? '↗' : '→' }}</span>
             </a>
           </article>
         </li>
