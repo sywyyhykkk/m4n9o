@@ -6,6 +6,7 @@ interface UiglyTemplate {
   description: string
   html: string
   sourceUrl: string
+  previewHeight?: number
 }
 
 useSeoMeta({
@@ -48,7 +49,9 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
 
         <div class="uigly-preview">
           <div class="uigly-preview__bar">LIVE PREVIEW · HTML + CSS</div>
-          <iframe :title="`${template.title} preview`" :srcdoc="template.html" sandbox="" loading="lazy" />
+          <div class="uigly-preview__viewport" :style="template.previewHeight ? { '--preview-height': `${template.previewHeight}px` } : undefined">
+            <iframe :title="`${template.title} preview`" :srcdoc="template.html" sandbox="" loading="lazy" />
+          </div>
         </div>
 
         <details class="uigly-source">
@@ -84,13 +87,14 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
 .uigly-template__heading p { margin: 0 0 1.5rem; color: #91ae99; }
 .uigly-preview { overflow: hidden; border: 1px solid #34553e; border-radius: 0.5rem; background: #f4f3ef; }
 .uigly-preview__bar { padding: 0.65rem 1rem; background: #102018; color: #91ae99; font-size: 0.75rem; letter-spacing: 0.08em; }
-.uigly-preview iframe { display: block; width: 100%; height: 420px; border: 0; }
+.uigly-preview__viewport { height: var(--preview-height, 420px); min-height: 420px; max-height: 760px; resize: vertical; overflow: auto; }
+.uigly-preview iframe { display: block; width: 100%; height: 100%; border: 0; }
 .uigly-source { margin-top: 1rem; border: 1px solid #2a4933; border-radius: 0.4rem; }
 .uigly-source summary { padding: 0.8rem 1rem; color: #45f47b; cursor: pointer; }
 .uigly-source pre { max-height: 30rem; overflow: auto; margin: 0; padding: 1rem; border-top: 1px solid #2a4933; color: #d9ffe4; font-size: 0.82rem; line-height: 1.5; }
 .uigly-source-link { display: inline-block; margin-top: 1rem; }
 
 @media (max-width: 600px) {
-  .uigly-preview iframe { height: 380px; }
+  .uigly-preview__viewport { min-height: 380px; height: var(--preview-height, 380px); }
 }
 </style>
