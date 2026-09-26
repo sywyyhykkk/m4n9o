@@ -2,9 +2,13 @@ import { mkdir, writeFile } from 'node:fs/promises'
 
 const source = 'https://raw.githubusercontent.com/sywyyhykkk/uigly/main'
 const output = new URL('../server/api/uigly.get.ts', import.meta.url)
+const buildRequest = Date.now()
 
 async function readSource(path) {
-  const response = await fetch(`${source}/${path}`, { signal: AbortSignal.timeout(15000) })
+  const response = await fetch(`${source}/${path}?build=${buildRequest}`, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
+  })
   if (!response.ok) {
     throw new Error(`Could not read UIgly ${path}: HTTP ${response.status}`)
   }
