@@ -5,7 +5,7 @@
 .nitro
 .cache
 dist
-/public/uigly/catalog.json
+/server/api/uigly.get.ts
 
 # Node dependencies
 node_modules

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 
 const source = 'https://raw.githubusercontent.com/sywyyhykkk/uigly/main'
-const output = new URL('../public/uigly/catalog.json', import.meta.url)
+const output = new URL('../server/api/uigly.get.ts', import.meta.url)
 
 async function readSource(path) {
   const response = await fetch(`${source}/${path}`, { signal: AbortSignal.timeout(15000) })
@@ -29,5 +29,5 @@ const templates = await Promise.all(catalog.map(async (template) => {
 }))
 
 await mkdir(new URL('.', output), { recursive: true })
-await writeFile(output, `${JSON.stringify(templates)}\n`)
+await writeFile(output, `const templates = ${JSON.stringify(templates)}\n\nexport default defineEventHandler(() => templates)\n`)
 console.log(`Synced ${templates.length} UIgly template(s)`)

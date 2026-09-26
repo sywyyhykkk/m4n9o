@@ -15,7 +15,7 @@ useSeoMeta({
   ogDescription: 'An intentionally ugly collection of plain HTML and CSS UI templates.',
 })
 
-const { data: templates, error } = await useFetch<UiglyTemplate[]>('/uigly/catalog.json')
+const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
 </script>
 
 <template>
