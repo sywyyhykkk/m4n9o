@@ -21,9 +21,17 @@ const templates = await Promise.all(catalog.map(async (template) => {
     throw new Error(`Invalid UIgly template id: ${template.id}`)
   }
 
+  const html = await readSource(`templates/${template.id}/index.html`)
+  if (!/^<!doctype html>/i.test(html.trimStart()) || !/<style\b/i.test(html)) {
+    throw new Error(`UIgly ${template.id} is not a standalone HTML and CSS template`)
+  }
+  if (/<script\b|<link\b|<iframe\b|\son[a-z]+\s*=|javascript:|@import\b|url\s*\(/i.test(html)) {
+    throw new Error(`UIgly ${template.id} contains blocked markup or URLs`)
+  }
+
   return {
     ...template,
-    html: await readSource(`templates/${template.id}/index.html`),
+    html,
     sourceUrl: `https://github.com/sywyyhykkk/uigly/blob/main/templates/${template.id}/index.html`,
   }
 }))

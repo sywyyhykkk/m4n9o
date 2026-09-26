@@ -10,9 +10,9 @@ interface UiglyTemplate {
 
 useSeoMeta({
   title: 'UIgly — M4N9O',
-  description: 'An intentionally ugly collection of plain HTML and CSS UI templates.',
+  description: 'A collection of UI mistakes found in everyday development, shown with plain HTML and CSS.',
   ogTitle: 'UIgly — M4N9O',
-  ogDescription: 'An intentionally ugly collection of plain HTML and CSS UI templates.',
+  ogDescription: 'A collection of UI mistakes found in everyday development, shown with plain HTML and CSS.',
 })
 
 const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
@@ -30,8 +30,10 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
       <header class="uigly-intro">
         <p class="uigly-eyebrow">./project/uigly</p>
         <h1>UIgly</h1>
-        <p>Intentionally ugly UI. Plain HTML and CSS, ready to open in a browser.</p>
-        <a href="https://github.com/sywyyhykkk/uigly" target="_blank" rel="noopener noreferrer">Contribute on GitHub ↗</a>
+        <div class="uigly-contribute">
+          <span>想要献丑？</span>
+          <a href="https://github.com/sywyyhykkk/uigly" target="_blank" rel="noopener noreferrer">Contribute on GitHub ↗</a>
+        </div>
       </header>
 
       <p v-if="error" class="uigly-state">Templates are temporarily unavailable.</p>
@@ -74,8 +76,8 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
 .uigly-intro { padding: clamp(2rem, 7vw, 5rem) 0 3rem; }
 .uigly-eyebrow, .uigly-template__number { color: #45f47b; font-size: 0.85rem; letter-spacing: 0.08em; }
 .uigly-intro h1 { margin: 0.5rem 0 1rem; font-size: clamp(3.5rem, 12vw, 7rem); font-weight: 560; letter-spacing: -0.075em; line-height: 1; }
-.uigly-intro > p:not(.uigly-eyebrow) { max-width: 38rem; color: #91ae99; font-size: 1.1rem; line-height: 1.6; }
-.uigly-intro a { display: inline-block; margin-top: 0.75rem; }
+.uigly-contribute { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.75rem; margin-top: 1rem; }
+.uigly-contribute span { color: #91ae99; }
 .uigly-state { color: #91ae99; }
 .uigly-template { margin-bottom: 4rem; border-top: 1px solid #2a4933; padding-top: 2rem; }
 .uigly-template__heading h2 { margin: 0.6rem 0; font-size: clamp(1.5rem, 4vw, 2.25rem); }
