@@ -7,6 +7,8 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxt/eslint'],
   runtimeConfig: {
+    clipboardServiceUrl: '',
+    clipboardServiceToken: '',
     public: {
       appVersion: '0.0.1',
     },

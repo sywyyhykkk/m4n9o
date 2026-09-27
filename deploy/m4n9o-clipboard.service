@@ -1,0 +1,19 @@
+[Unit]
+Description=M4N9O temporary clipboard service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+EnvironmentFile=/etc/m4n9o-clipboard.env
+ExecStart=/usr/bin/python3 /opt/m4n9o-clipboard/clipboard-service.py
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target
