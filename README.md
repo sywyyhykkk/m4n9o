@@ -25,6 +25,12 @@ Merging a UIgly pull request triggers the M4N9O Vercel Deploy Hook through the U
 
 The Nuxt API forwards requests to the small Python service in `deploy/clipboard-service.py`. Set `NUXT_CLIPBOARD_SERVICE_URL` and `NUXT_CLIPBOARD_SERVICE_TOKEN` on the Nuxt server; set the same token as `CLIPBOARD_SERVICE_TOKEN` on the Python service. The service keeps only the latest text in memory and clears it on expiry or restart. The production server runs the included systemd unit and Caddy configuration.
 
+## Home design lab
+
+`/lab/home` embeds the standalone Three.js C2 interior design viewer. `/lab` links to it alongside the existing clipboard tools. The iframe isolates the viewer's global styles and animation lifecycle from Nuxt navigation, and allows fullscreen viewing.
+
+The static export lives in `public/lab/home-viewer/`: `index.html`, `style.css`, and `app.js` are the runtime; `assets/` contains the original floor plan and the downloaded textures; `SOURCES.json` and `licenses/` preserve provenance. The bundle includes Three.js 0.180.0 and embeds its color textures, so it requires no third-party runtime requests. To update the model, rebuild the standalone Maison source project with `npm run build` and replace the export files together. No additional Nuxt dependencies or environment variables are required.
+
 ## Development Server
 
 Start the development server on `http://localhost:3000`:

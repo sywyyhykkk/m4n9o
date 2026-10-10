@@ -27,6 +27,17 @@ useSeoMeta({
           </div>
         </div>
       </article>
+
+      <article class="lab-card">
+        <span class="lab-card__number">002</span>
+        <div>
+          <h2>拾光 Maison</h2>
+          <p>法式中古装修的三维空间实验。探索全屋鸟瞰、平面布局和室内漫游。</p>
+          <div class="lab-card__links">
+            <NuxtLink to="/lab/home">Explore the home ↗</NuxtLink>
+          </div>
+        </div>
+      </article>
     </section>
   </main>
 </template>
@@ -39,6 +50,7 @@ useSeoMeta({
 .lab-intro h1 { margin: 0; color: #45f47b; font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: 560; letter-spacing: -.05em; }
 .lab-intro > p:last-child { color: #8da895; }
 .lab-card { display: grid; grid-template-columns: 3.5rem 1fr; gap: 1rem; padding: 1.5rem; border: 1px solid #1f3526; border-radius: .35rem; background: #07110a; }
+.lab-card + .lab-card { margin-top: 1rem; }
 .lab-card__number { color: #52735c; font-size: .875rem; }
 .lab-card h2 { margin: 0; color: #d9ffe4; font-size: 1.25rem; font-weight: 560; }
 .lab-card p { margin: .75rem 0 1.5rem; color: #8da895; line-height: 1.6; }
