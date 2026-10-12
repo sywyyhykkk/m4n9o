@@ -13,7 +13,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <main class="home-lab">
+  <main class="home-lab" @contextmenu.prevent>
     <header class="home-lab__bar">
       <NuxtLink to="/lab">← Lab</NuxtLink>
       <span>./lab/home</span>
@@ -29,6 +29,13 @@ useSeoMeta({
 </template>
 
 <style scoped>
+.home-lab,
+.home-lab * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .home-lab {
   display: flex;
   flex-direction: column;
