@@ -38,6 +38,18 @@ useSeoMeta({
           </div>
         </div>
       </article>
+
+      <article class="lab-card">
+        <span class="lab-card__number">003</span>
+        <div>
+          <h2>Subbit</h2>
+          <p>数字生活，心中有数。本地优先的订阅与买断软件成本管理工具，支持 macOS 和 Windows。</p>
+          <div class="lab-card__links">
+            <a href="https://github.com/sywyyhykkk/subbit" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+            <a href="https://github.com/sywyyhykkk/subbit/releases/latest" target="_blank" rel="noopener noreferrer">Download ↗</a>
+          </div>
+        </div>
+      </article>
     </section>
   </main>
 </template>
