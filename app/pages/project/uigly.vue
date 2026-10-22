@@ -11,9 +11,9 @@ interface UiglyTemplate {
 
 useSeoMeta({
   title: 'UIgly — M4N9O',
-  description: 'A collection of UI mistakes found in everyday development, shown with plain HTML and CSS.',
+  description: 'A collection of UI mistakes found in everyday development, shown with standalone HTML, CSS, and JavaScript examples.',
   ogTitle: 'UIgly — M4N9O',
-  ogDescription: 'A collection of UI mistakes found in everyday development, shown with plain HTML and CSS.',
+  ogDescription: 'A collection of UI mistakes found in everyday development, shown with standalone HTML, CSS, and JavaScript examples.',
 })
 
 const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
@@ -48,14 +48,14 @@ const { data: templates, error } = await useFetch<UiglyTemplate[]>('/api/uigly')
         </div>
 
         <div class="uigly-preview">
-          <div class="uigly-preview__bar">LIVE PREVIEW · HTML + CSS</div>
+          <div class="uigly-preview__bar">LIVE PREVIEW · HTML + CSS + JS</div>
           <div class="uigly-preview__viewport" :style="template.previewHeight ? { '--preview-height': `${template.previewHeight}px` } : undefined">
-            <iframe :title="`${template.title} preview`" :srcdoc="template.html" sandbox="" loading="lazy" />
+            <iframe :title="`${template.title} preview`" :srcdoc="template.html" sandbox="allow-scripts" loading="lazy" />
           </div>
         </div>
 
         <details class="uigly-source">
-          <summary>View HTML and CSS</summary>
+          <summary>View source</summary>
           <pre><code>{{ template.html }}</code></pre>
         </details>
         <a class="uigly-source-link" :href="template.sourceUrl" target="_blank" rel="noopener noreferrer">View source on GitHub ↗</a>

@@ -1,10 +1,16 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import { Script } from 'node:vm'
 
 const source = 'https://raw.githubusercontent.com/sywyyhykkk/uigly/main'
+const localSource = process.env.UIGLY_SOURCE_DIR
 const output = new URL('../server/api/uigly.get.ts', import.meta.url)
 const buildRequest = Date.now()
 
 async function readSource(path) {
+  if (localSource) {
+    return readFile(resolve(localSource, path), 'utf8')
+  }
   const response = await fetch(`${source}/${path}?build=${buildRequest}`, {
     cache: 'no-store',
     signal: AbortSignal.timeout(15000),
@@ -30,10 +36,21 @@ const templates = await Promise.all(catalog.map(async (template) => {
 
   const html = await readSource(`templates/${template.id}/index.html`)
   if (!/^<!doctype html>/i.test(html.trimStart()) || !/<style\b/i.test(html)) {
-    throw new Error(`UIgly ${template.id} is not a standalone HTML and CSS template`)
+    throw new Error(`UIgly ${template.id} is not a standalone HTML template with inline CSS`)
   }
-  if (/<script\b|<link\b|<iframe\b|\son[a-z]+\s*=|javascript:|@import\b|url\s*\(/i.test(html)) {
+  if (/<link\b|<iframe\b|\son[a-z]+\s*=|javascript:|@import\b|url\s*\(/i.test(html)) {
     throw new Error(`UIgly ${template.id} contains blocked markup or URLs`)
+  }
+  // Match UIgly's validator: allow classic inline scripts, never external scripts.
+  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]
+  if (scripts.length !== (html.match(/<script\b/gi) ?? []).length) {
+    throw new Error(`UIgly ${template.id} contains an incomplete script element`)
+  }
+  for (const [, attributes, script] of scripts) {
+    if (attributes.trim()) {
+      throw new Error(`UIgly ${template.id} scripts must be inline and have no attributes`)
+    }
+    new Script(script, { filename: `templates/${template.id}/index.html` })
   }
 
   return {

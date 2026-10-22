@@ -15,7 +15,14 @@ The terminal version is controlled by `NUXT_PUBLIC_APP_VERSION` in `.env`.
 
 ## UIgly gallery
 
-`/project/uigly` displays templates from the separate [UIgly repository](https://github.com/sywyyhykkk/uigly). Before development or a production build, `scripts/sync-uigly.mjs` reads the approved catalog and standalone HTML files from `uigly/main` into an ignored local server route. The gallery previews each file in a sandboxed iframe and shows its source.
+`/project/uigly` displays templates from the separate [UIgly repository](https://github.com/sywyyhykkk/uigly). Before development or a production build, `scripts/sync-uigly.mjs` reads the approved catalog and standalone HTML files from `uigly/main` into an ignored local server route. The sync accepts inline CSS and optional classic inline JavaScript, checks script syntax, and rejects external scripts and inline event attributes. The gallery previews each file with `sandbox="allow-scripts"`, without same-origin access or form submission permissions, and shows its source. Interactive demos must use local button handlers rather than native form submission.
+
+To verify unpublished UIgly changes in the actual gallery, point the sync at a local checkout (the default remains `uigly/main`):
+
+```bash
+UIGLY_SOURCE_DIR=/absolute/path/to/uigly pnpm dev
+UIGLY_SOURCE_DIR=/absolute/path/to/uigly pnpm build
+```
 
 Merging a UIgly pull request triggers the M4N9O Vercel Deploy Hook through the UIgly repository's `M4N9O_DEPLOY_HOOK` Actions secret. A successful M4N9O build publishes the refreshed gallery.
 
@@ -44,6 +51,7 @@ pnpm dev
 ```bash
 pnpm lint
 pnpm typecheck
+node --test scripts/sync-uigly.test.mjs
 pnpm build
 ```
 
