@@ -7,6 +7,12 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: 'Magpie Screen',
+    repository: 'sywyyhykkk/magpie-screen',
+    role: 'Own project',
+    url: 'https://github.com/sywyyhykkk/magpie-screen',
+  },
+  {
     name: 'UIgly',
     repository: 'sywyyhykkk/uigly',
     role: 'Own project',
